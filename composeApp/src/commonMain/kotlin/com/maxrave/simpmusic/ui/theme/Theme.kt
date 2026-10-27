@@ -48,6 +48,7 @@ private val DarkAppColors =
 // Overlays stay dark in both themes: they cover artwork, where content is always light.
 private val LightAppColors =
     DarkAppColors.copy(
+        lyricActive = Color(0xFFFFFF00),
         shimmerBackground = shimmerBackgroundLight,
         shimmerLine = shimmerLineLight,
     )
@@ -90,8 +91,7 @@ fun parseThemeColorHex(hex: String): Color? {
  * the Material 3 stance) rather than pure white: a full-bleed #FFFFFF expanse glares on a large
  * desktop window, and even Apple — who pins systemBackground to white — puts #F2F2F7 behind
  * list pages. Pure white is kept for surfaceBright/surfaceContainerLowest so cards and sheets
- * still have a brighter-than-page tier to lift onto. Dark keeps the generated neutrals (a tone-6
- * page), not AMOLED pure black.
+ * still have a brighter-than-page tier to lift onto. Dark surfaces use the separate CRT ramp.
  */
 private fun ColorScheme.withNeutralLightSurfaces(): ColorScheme =
     copy(
@@ -115,6 +115,29 @@ private fun ColorScheme.withNeutralLightSurfaces(): ColorScheme =
         inverseOnSurface = Color(0xFFF1F1F1),
     )
 
+/** CRT surfaces; custom accents retain their generated primary and onPrimary. */
+private fun ColorScheme.withCrtDarkSurfaces(useCrtAccent: Boolean): ColorScheme =
+    copy(
+        background = crtBackground,
+        surface = crtBackground,
+        surfaceDim = crtBackground,
+        surfaceBright = crtSurfaceContainerHighest,
+        surfaceVariant = crtSurfaceContainerHighest,
+        surfaceContainerLowest = crtSurfaceContainerLowest,
+        surfaceContainerLow = crtSurfaceContainerLow,
+        surfaceContainer = crtSurfaceContainer,
+        surfaceContainerHigh = crtSurfaceContainerHigh,
+        surfaceContainerHighest = crtSurfaceContainerHighest,
+        onBackground = crtOnSurface,
+        onSurface = crtOnSurface,
+        onSurfaceVariant = crtOnSurfaceVariant,
+        outline = crtOutline,
+        outlineVariant = crtOutlineVariant,
+        primary = if (useCrtAccent) crtPrimary else primary,
+        onPrimary = if (useCrtAccent) crtOnPrimary else onPrimary,
+        surfaceTint = if (useCrtAccent) crtPrimary else primary,
+    )
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AppTheme(
@@ -133,21 +156,29 @@ fun AppTheme(
         } else {
             null
         }
+    val defaultSeed = if (isDark) seed else lightSeed
     val seedColor =
         if (themeColorSource == DataStoreManager.THEME_COLOR_CUSTOM) {
-            customThemeColor ?: seed
+            customThemeColor ?: defaultSeed
         } else {
-            seed
+            defaultSeed
         }
-    // Light pins the neutrals to a neutral-grey ramp (the seed otherwise tints them warm/cream);
-    // dark keeps the generated neutrals as they are.
+    // Wallpaper keeps its platform palette; generated dark palettes use CRT surfaces.
     val colorScheme =
         wallpaperScheme
             ?: rememberDynamicColorScheme(
                 seedColor = seedColor,
                 isDark = isDark,
                 style = PaletteStyle.TonalSpot,
-                modifyColorScheme = { cs -> if (isDark) cs else cs.withNeutralLightSurfaces() },
+                modifyColorScheme = { cs ->
+                    if (isDark) {
+                        cs.withCrtDarkSurfaces(
+                            useCrtAccent = themeColorSource != DataStoreManager.THEME_COLOR_CUSTOM || customThemeColor == null,
+                        )
+                    } else {
+                        cs.withNeutralLightSurfaces()
+                    }
+                },
             )
     // Immersive screens stay dark even at light theme (see [ForceDarkContent]). Resolve their scheme
     // once here instead of letting every such subtree build a palette of its own.

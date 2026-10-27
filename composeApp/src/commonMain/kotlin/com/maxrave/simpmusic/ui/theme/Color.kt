@@ -8,7 +8,24 @@ import androidx.compose.ui.graphics.Color
  * Brand seed color. The whole Material 3 ColorScheme is generated from this
  * color at runtime — see [AppTheme].
  */
-val seed = Color(0xFF8ECAE6)
+val seed = Color(0xFF4DFF88)
+
+/** Preserve the existing default palette in light mode. */
+val lightSeed = Color(0xFF8ECAE6)
+
+// CRT phosphor palette: green-tinted dark surfaces and high-contrast text.
+val crtBackground = Color(0xFF0A0F0B)
+val crtSurfaceContainerLowest = Color(0xFF070B08)
+val crtSurfaceContainerLow = Color(0xFF0E150F)
+val crtSurfaceContainer = Color(0xFF121B14)
+val crtSurfaceContainerHigh = Color(0xFF172219)
+val crtSurfaceContainerHighest = Color(0xFF1D2A20)
+val crtOnSurface = Color(0xFFD8F5DE)
+val crtOnSurfaceVariant = Color(0xFF7FA88B)
+val crtOutline = Color(0xFF3E5C46)
+val crtOutlineVariant = Color(0xFF25382B)
+val crtPrimary = Color(0xFF4DFF88)
+val crtOnPrimary = Color(0xFF00210C)
 
 // ===== Semantic colors (not derivable from the color scheme) =====
 
@@ -16,7 +33,7 @@ val seed = Color(0xFF8ECAE6)
 val favoriteColor = Color(0xFFFF4081)
 
 /** Currently playing lyric line. */
-val lyricActiveColor = Color(0xFFFFFF00)
+val lyricActiveColor = Color(0xFF4DFF88)
 
 val shimmerBackground = Color(0x7E383737)
 val shimmerLine = Color(0xFF4D4848)
